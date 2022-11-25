@@ -22,31 +22,36 @@ client.on('connect', () => {
   console.log(`client is connected to the fileserver`);
 });
 
-// process.stdin.setEncoding("ascii");
-let input = "";
 process.stdin.on("data", (input) => {
   client.write(input)
+  //put a flag here
+  fileName = input;
 });
 
+
 client.on('data', message => {
-  console.log('server sent:', message);
-  fs.writeFile(input, message, 'utf8', (err) => {
-    console.log(input);
-    if (err) {
-      // edge case 2: file path is invalid
-      if (err.code === 'ENOENT') {
-        console.log("File path", input, "is invalid.");
-        process.exit();
+  //use a flag
+  if (message.startsWith('$$$$')) {
+    message = message.substring(4);
+    fs.writeFile(fileName, message, 'utf8', (err) => {
+      if (err) {
+        // edge case 2: file path is invalid
+        if (err.code === 'ENOENT') {
+          console.log("File path", fileName, "is invalid.");
+          process.exit();
+        } else {
+          console.log(err);
+          process.exit();
+        }
       } else {
-        console.log(err);
-        process.exit();
+        fs.stat(fileName, (err, stats) => {
+          console.log(`Downloaded and saved ${stats.size} bytes to ${fileName}`);
+          process.exit();
+        });
       }
-    } else {
-      fs.stat(fileName, (err, stats) => {
-        console.log(`Downloaded and saved ${stats.size} bytes to ${fileName}`);
-        process.exit();
-      });
-    }
-  });
+    });
+  } else {
+    console.log('server sent:', message);
+  }
 });
 

@@ -32,7 +32,7 @@ server.on('connection', (client) => {
             console.log(err);
           }
           console.log(`reading file...`);
-          client.write(file);
+          client.write("$$$$"+file);
           console.log(`sent file contents`);
         });
 
@@ -41,7 +41,6 @@ server.on('connection', (client) => {
     if (!found) {
       client.write(`Sorry, the file: ${fileToSearchFor} was not found...\n`)
     }
-    //process.exit();
   });
 });
 
